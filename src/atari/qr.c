@@ -72,29 +72,44 @@ uint8_t fuji_qr_output(char *output, uint16_t len) {
   return OS.dcb.dstats;
 }
 
-bool qr_encode_text(char *text, char *result) {
+bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint8_t output_mode, char *result) {
+// bool qr_encode_text(char *text, char *result) {
   uint8_t status;
   uint16_t length;
   uint16_t i = 0;
 
-  uint8_t version = 3;
-  uint8_t ecc = 0;
-  uint8_t shorten = true << 4;
-  uint8_t output_mode = 2;
+  // uint8_t version = 3;
+  // uint8_t ecc = 0;
+  // uint8_t shorten = true << 4;
+  // uint8_t output_mode = 2;
 
 	status = fuji_qr_input(text);
-	status = fuji_qr_encode(qrData, version, ecc | shorten);
+	status = fuji_qr_encode(qrData, version, ecc | (shorten<<4));
 	status = fuji_qr_length(&length, output_mode);
 	status = fuji_qr_output(qrData, length);
 	printf("in: %s | out: %d bytes\n", text, length);
 
 	cputc('\n');
-	for (i = 0; i<length; i++) {
-	 putchar(qrData[i]);
-	 //  if (i % 21 == 0) printf("\n ");
-	 //  if (qrData[i]) cputc(' '|128);
-		// else cputc(' ');
+
+	if (output_mode == 0) { // 0x00 or 0x01 bytes
+    for (i = 0; i<length; i++) {
+      if (i % 21 == 0) printf("\n ");
+      if (qrData[i]) cputc(' '|128);
+      else cputc(' ');
+  	}
 	}
+	else if (output_mode == 1) { // Bits
+  	puts("(display not implemented yet)");
+	}
+	else if (output_mode == 2) { // ATASCII
+  	for (i = 0; i<length; i++) {
+      putchar(qrData[i]);
+  	}
+	}
+	else if (output_mode == 3) { // Bitmap
+  	puts("(display not implemented yet)");
+	}
+
 	cputc('\n');
 
 	return true;
