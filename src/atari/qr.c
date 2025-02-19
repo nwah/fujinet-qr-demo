@@ -16,7 +16,7 @@ uint8_t qrData[1024];
 
 void siov(void)
 {
-    __asm__ ("JSR $E459");
+  __asm__ ("JSR $E459");
 }
 
 void initGraphics(void)
@@ -108,46 +108,46 @@ bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint
   uint8_t col = 0;
   uint8_t row = 0;
 
-	status = fuji_qr_input(text);
-	status = fuji_qr_encode(qrData, version, ecc | (shorten<<4));
-	status = fuji_qr_length(&length, output_mode);
-	status = fuji_qr_output(qrData, length);
-	printf("in: %s | out: %d bytes\n", text, length);
+  status = fuji_qr_input(text);
+  status = fuji_qr_encode(qrData, version, ecc | (shorten<<4));
+  status = fuji_qr_length(&length, output_mode);
+  status = fuji_qr_output(qrData, length);
+  printf("in: %s | out: %d bytes\n", text, length);
 
-	// 0x00 or 0x01 bytes
-	if (output_mode == 0) {
+  // 0x00 or 0x01 bytes
+  if (output_mode == 0) {
     for (i = 0; i<length; i++) {
       if (i % 21 == 0) printf("\n ");
       if (qrData[i]) cputc(' '|128);
       else cputc(' ');
-  	}
-	}
-	// Bits
-	else if (output_mode == 1) {
-  	puts("(display not implemented yet)");
-	}
-	// ready-to-print ATASCII
-	else if (output_mode == 2) {
-  	for (i = 0; i<length; i++) {
+    }
+  }
+  // Bits
+  else if (output_mode == 1) {
+    puts("(display not implemented yet)");
+  }
+  // ready-to-print ATASCII
+  else if (output_mode == 2) {
+    for (i = 0; i<length; i++) {
       putchar(qrData[i]);
-  	}
-	}
-	// 1-bit bitmap
-	else if (output_mode == 3) {
-	  setupPMG();
-		cols = 2 + version;
-	  for (i = 0; i<length; i++) {
-			col = i % cols;
-			if (col == 0 && i > 0) {
-			  row++;
-			}
-			POKE(PM_BASE + 0x200 + col * 0x80 + row + 24, qrData[i]);
-		}
-	}
+    }
+  }
+  // 1-bit bitmap
+  else if (output_mode == 3) {
+    setupPMG();
+    cols = 2 + version;
+    for (i = 0; i<length; i++) {
+      col = i % cols;
+      if (col == 0 && i > 0) {
+        row++;
+      }
+      POKE(PM_BASE + 0x200 + col * 0x80 + row + 24, qrData[i]);
+    }
+  }
 
-	cgetc();
+  cgetc();
 
-	memset(PM_BASE, 0, 0x800);
+  memset(PM_BASE, 0, 0x800);
 
-	return true;
+  return true;
 }

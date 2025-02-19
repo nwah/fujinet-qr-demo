@@ -11,35 +11,35 @@ char *version = "1.0.0";
 
 static void readline(char *s)
 {
-    uint16_t i = 0;
-    uint8_t c;
+  uint16_t i = 0;
+  uint8_t c;
 
-    cursor(1);
+  cursor(1);
 
-    do {
+  do {
 #ifdef __APPLE2__
-      gotox(i);
+    gotox(i);
 #endif
 
-      c = cgetc();
+    c = cgetc();
 
-      if (isprint(c)) {
-        putchar(c);
-        s[i++] = c;
+    if (isprint(c)) {
+      putchar(c);
+      s[i++] = c;
+    }
+    else if ((c == CH_CURS_LEFT) || (c == CH_DEL)) {
+      if (i) {
+        putchar(CH_CURS_LEFT);
+        putchar(' ');
+        putchar(CH_CURS_LEFT);
+        --i;
       }
-      else if ((c == CH_CURS_LEFT) || (c == CH_DEL)) {
-        if (i) {
-          putchar(CH_CURS_LEFT);
-          putchar(' ');
-          putchar(CH_CURS_LEFT);
-          --i;
-        }
-      }
-    } while (c != CH_ENTER);
-    putchar('\n');
-    s[i] = '\0';
+    }
+  } while (c != CH_ENTER);
+  putchar('\n');
+  s[i] = '\0';
 
-    cursor(0);
+  cursor(0);
 }
 
 int main() {
@@ -115,5 +115,5 @@ int main() {
     ok = qr_encode_text(text, version, ecc, shorten, output_mode, code);
   }
 
-	return 0;
+  return 0;
 }
