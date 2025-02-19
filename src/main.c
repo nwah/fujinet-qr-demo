@@ -43,7 +43,8 @@ static void readline(char *s)
 }
 
 int main() {
-  char *text;
+  // char *text;
+  char text[32];
   uint8_t version;
   uint8_t ecc;
   bool shorten;
@@ -51,6 +52,8 @@ int main() {
   char *code;
   char c;
   bool ok;
+
+  initGraphics();
 
   while (1) {
     clrscr();
@@ -110,8 +113,6 @@ int main() {
 
     clrscr();
     ok = qr_encode_text(text, version, ecc, shorten, output_mode, code);
-
-    c = cgetc();
   }
 
 	return 0;

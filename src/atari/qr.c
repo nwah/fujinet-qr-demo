@@ -1,19 +1,47 @@
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <atari.h>
 #include <conio.h>
+#include <peekpoke.h>
 #include <string.h>
 
 #include "qr.h"
 
 #define QR_ENCODE_TIMEOUT 3
+#define PM_BASE 0xA000
 
-uint8_t qrData[625];
+uint8_t qrData[1024];
 
 void siov(void)
 {
     __asm__ ("JSR $E459");
+}
+
+void initGraphics(void)
+{
+  OS.sdmctl = OS.sdmctl | 8;
+  POKE(0xD407, PM_BASE/256);
+  // Turn on P+M
+  POKE(0xD01D, 3);
+}
+
+void setupPMG(void)
+{
+  memset(PM_BASE, 0, 0x800);
+  GTIA_WRITE.sizep0 = PMG_SIZE_NORMAL;
+  GTIA_WRITE.sizep1 = PMG_SIZE_NORMAL;
+  GTIA_WRITE.sizep2 = PMG_SIZE_NORMAL;
+  GTIA_WRITE.sizep3 = PMG_SIZE_NORMAL;
+  GTIA_WRITE.hposp0 = 56;
+  GTIA_WRITE.hposp1 = 64;
+  GTIA_WRITE.hposp2 = 72;
+  GTIA_WRITE.hposp3 = 80;
+  OS.pcolr0 = 0x0F;
+  OS.pcolr1 = 0x0F;
+  OS.pcolr2 = 0x0F;
+  OS.pcolr3 = 0x0F;
 }
 
 uint8_t fuji_qr_input(char *text) {
@@ -73,15 +101,12 @@ uint8_t fuji_qr_output(char *output, uint16_t len) {
 }
 
 bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint8_t output_mode, char *result) {
-// bool qr_encode_text(char *text, char *result) {
   uint8_t status;
   uint16_t length;
   uint16_t i = 0;
-
-  // uint8_t version = 3;
-  // uint8_t ecc = 0;
-  // uint8_t shorten = true << 4;
-  // uint8_t output_mode = 2;
+  uint8_t cols = 3;
+  uint8_t col = 0;
+  uint8_t row = 0;
 
 	status = fuji_qr_input(text);
 	status = fuji_qr_encode(qrData, version, ecc | (shorten<<4));
@@ -89,28 +114,40 @@ bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint
 	status = fuji_qr_output(qrData, length);
 	printf("in: %s | out: %d bytes\n", text, length);
 
-	cputc('\n');
-
-	if (output_mode == 0) { // 0x00 or 0x01 bytes
+	// 0x00 or 0x01 bytes
+	if (output_mode == 0) {
     for (i = 0; i<length; i++) {
       if (i % 21 == 0) printf("\n ");
       if (qrData[i]) cputc(' '|128);
       else cputc(' ');
   	}
 	}
-	else if (output_mode == 1) { // Bits
+	// Bits
+	else if (output_mode == 1) {
   	puts("(display not implemented yet)");
 	}
-	else if (output_mode == 2) { // ATASCII
+	// ready-to-print ATASCII
+	else if (output_mode == 2) {
   	for (i = 0; i<length; i++) {
       putchar(qrData[i]);
   	}
 	}
-	else if (output_mode == 3) { // Bitmap
-  	puts("(display not implemented yet)");
+	// 1-bit bitmap
+	else if (output_mode == 3) {
+	  setupPMG();
+		cols = 2 + version;
+	  for (i = 0; i<length; i++) {
+			col = i % cols;
+			if (col == 0 && i > 0) {
+			  row++;
+			}
+			POKE(PM_BASE + 0x200 + col * 0x80 + row + 24, qrData[i]);
+		}
 	}
 
-	cputc('\n');
+	cgetc();
+
+	memset(PM_BASE, 0, 0x800);
 
 	return true;
 }

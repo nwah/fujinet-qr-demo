@@ -6,4 +6,6 @@
 
 #include "qr.h"
 
+void initGraphics(void);
+
 #endif // MAIN_H
