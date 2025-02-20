@@ -109,9 +109,33 @@ bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint
   uint8_t row = 0;
 
   status = fuji_qr_input(text);
+  if (status == 144) {
+    printf("Failed to send data to FujiNet");
+    cgetc();
+    return false;
+  }
+
   status = fuji_qr_encode(qrData, version, ecc | (shorten<<4));
+  if (status == 144) {
+    printf("Failed to encode data");
+    cgetc();
+    return false;
+  }
+
   status = fuji_qr_length(&length, output_mode);
+  if (status == 144) {
+    printf("Failed to get output length");
+    cgetc();
+    return false;
+  }
+
   status = fuji_qr_output(qrData, length);
+  if (status == 144) {
+    printf("Failed to get QR output");
+    cgetc();
+    return false;
+  }
+
   printf("in: %s | out: %d bytes\n", text, length);
 
   // 0x00 or 0x01 bytes
