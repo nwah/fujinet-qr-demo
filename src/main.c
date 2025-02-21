@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "main.h"
-#include "../../fujinet-lib/fujinet-fuji.h"
+#include "fujinet-fuji.h"
 
 char *version = "1.0.0";
 
