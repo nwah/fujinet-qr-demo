@@ -5,6 +5,8 @@ ifeq ($(DEBUG),true)
     $(info >>>Starting custom-atari.mk)
 endif
 
+################################################################
+# COMPILE FLAGS
 # reserved memory for graphics
 LDFLAGS += -Wl -D,__RESERVED_MEMORY__=0x2000
 
@@ -16,21 +18,29 @@ LDFLAGS += -Wl -D,__RESERVED_MEMORY__=0x2000
 
 SUFFIX = .com
 DISK_TASKS += .atr
-ASSETS_DIR := assets
 PICOBOOT_DOWNLOAD_URL = https://github.com/FujiNetWIFI/assets/releases/download/picobin/picoboot.bin
 
+# atari cache dir
+ATARI_CACHE_DIR := $(CACHE_DIR)/atari
+
 .atr:
+	@which dir2atr > /dev/null 2>&1 ; \
+	if [ $$? -ne 0 ] ; then \
+		echo -e "\nERROR! You must compile and install dir2atr from https://github.com/HiassofT/AtariSIO to create atari disks\n" ; \
+		exit 1 ; \
+	fi
 	$(call MKDIR,$(DIST_DIR)/atr)
-	$(call MKDIR,$(ASSETS_DIR))
+	$(call MKDIR,$(CACHE_DIR))
+	$(call MKDIR,$(ATARI_CACHE_DIR))
 	cp $(DIST_DIR)/$(PROGRAM_TGT)$(SUFFIX) $(DIST_DIR)/atr/$(PROGRAM)$(SUFFIX)
 	@if [ -f $(DIST_DIR)/$(PROGRAM).atr ] ; then \
-	  rm $(DIST_DIR)/$(PROGRAM).atr ; \
-	fi ;
-	@if [ ! -f $(ASSETS_DIR)/picoboot.bin ] ; then \
-		echo "Downloading picoboot.bin"; \
-		curl -sL $(PICOBOOT_DOWNLOAD_URL) -o $(ASSETS_DIR)/picoboot.bin; \
+		rm $(DIST_DIR)/$(PROGRAM).atr ; \
 	fi
-	dir2atr -m -S -B $(ASSETS_DIR)/picoboot.bin $(DIST_DIR)/$(PROGRAM).atr $(DIST_DIR)/atr
+	@if [ ! -f $(ATARI_CACHE_DIR)/picoboot.bin ] ; then \
+		echo "Downloading picoboot.bin"; \
+		curl -sL $(PICOBOOT_DOWNLOAD_URL) -o $(ATARI_CACHE_DIR)/picoboot.bin; \
+	fi
+	dir2atr -m -S -B $(ATARI_CACHE_DIR)/picoboot.bin $(DIST_DIR)/$(PROGRAM).atr $(DIST_DIR)/atr
 	rm -rf $(DIST_DIR)/atr
 
 ################################################################
@@ -54,3 +64,4 @@ atari_EMUCMD := $($(ATARI_EMULATOR))
 ifeq ($(ATARI_EMULATOR),)
 atari_EMUCMD := $(ALTIRRA)
 endif
+

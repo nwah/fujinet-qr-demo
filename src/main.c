@@ -5,9 +5,13 @@
 #include <string.h>
 #include <stdio.h>
 #include "main.h"
-#include "../../fujinet-lib/fujinet-fuji.h"
+#include "fujinet-fuji.h"
 
 char *version = "1.0.0";
+
+#ifndef CH_DEL
+#define CH_DEL 0x7F
+#endif
 
 static void readline(char *s)
 {
@@ -53,7 +57,9 @@ int main() {
   char c;
   bool ok;
 
+#ifdef __ATARI__
   initGraphics();
+#endif
 
   while (1) {
     clrscr();
