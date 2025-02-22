@@ -13,6 +13,8 @@
 #define PM_BASE 0xA000
 
 uint8_t qrData[1024];
+uint8_t defaultDL[3 + 2 + 24 + 3];
+uint8_t hiresDL[3 + 2 + 192 + 3];
 
 void siov(void)
 {
@@ -42,6 +44,25 @@ void setupPMG(void)
   OS.pcolr1 = 0x0F;
   OS.pcolr2 = 0x0F;
   OS.pcolr3 = 0x0F;
+}
+
+void setupHiRes(void)
+{
+  uint8_t i = 0;
+  hiresDL[0] = DL_BLK8;
+  hiresDL[1] = DL_BLK8;
+  hiresDL[2] = DL_BLK8;
+  hiresDL[3] = DL_LMS(DL_MAP320x1x1);
+  hiResDL[4] = PM_BASE;
+  hiResDL[5] = PM_BASE >> 8;
+  for (i = 7; i < 199; i++) {
+    hiresDL[i] = 0x0F;
+  }
+  hiresDL[200] = DL_JVB;
+  hiresDL[201] = &hiresDL;
+  hiresDL[202] = &hiresDL >> 8;
+  POKE()
+  memset(PM_BASE, 0, 0x2000);
 }
 
 uint8_t fuji_qr_input(char *text) {
@@ -104,6 +125,10 @@ bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint
   uint8_t status;
   uint16_t length;
   uint16_t i = 0;
+  uint8_t size = 0;
+  uint8_t b = 0;
+  uint8_t x = 0;
+  uint8_t y = 0;
   uint8_t cols = 3;
   uint8_t col = 0;
   uint8_t row = 0;
@@ -138,6 +163,8 @@ bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint
 
   printf("in: %s | out: %d bytes\n", text, length);
 
+  size = 17 + version * 4;
+
   // 0x00 or 0x01 bytes
   if (output_mode == 0) {
     for (i = 0; i<length; i++) {
@@ -148,6 +175,18 @@ bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint
   }
   // Bits
   else if (output_mode == 1) {
+    setupHiRes();
+    i = 0;
+    b = 0;
+    for (y = 0; y < size; y++) {
+      for (x = 0; x < size; x++) {
+        b = i % 8;
+        if (b == 0 && x > 0) {
+          i++;
+        }
+        val = (qrData[i] << b) && 1;
+      }
+    }
     puts("(display not implemented yet)");
   }
   // ready-to-print ATASCII

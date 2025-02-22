@@ -106,7 +106,12 @@ int main() {
     puts("Output format?");
     puts("  0 = Bytes");
     puts("  1 = Binary");
-    puts("  2 = Printable text");
+#ifdef ATARI
+    puts("  2 = ATASCII");
+#endif
+#ifdef APPLE2
+    puts("  2 = Text");
+#endif
     puts("  3 = Bitmap");
     c = cgetc();
     if (c >= '0' && c <= '3') {

@@ -20,7 +20,7 @@ all:
 		echo "-------------------------------------"; \
 		$(MAKE) --no-print-directory -f ./makefiles/build.mk CURRENT_TARGET=$$target PROGRAM=$(PROGRAM) $(MAKECMDGOALS); \
 	done
-	
+
 # if disk images were built show them
 	@if [ "$(DEBUG)" = "true" ] && [ -d "./dist" ]; then \
 		echo "Contents of dist:"; \
@@ -44,4 +44,3 @@ help:
 	@echo "test      - run application in emulator for given platform."
 	@echo "            specific platforms may expose additional variables to run with"
 	@echo "            different emulators, see makefiles/custom-<platform>.mk"
-	
