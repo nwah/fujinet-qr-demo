@@ -1,6 +1,6 @@
 # Sample Makefile For FujiNet Applications
 
-TARGETS = atari
+TARGETS = atari apple2
 PROGRAM := qr-demo
 
 # Set this to the version of FN-LIB you wish to use in this project:
