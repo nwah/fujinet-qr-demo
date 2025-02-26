@@ -107,7 +107,7 @@ bool fuji_qr_output(uint8_t *output, uint16_t len) {
   }
 
   // memcpy(output, &sp_payload[2], len);
-  memcpy(output, &sp_payload[0], 441);
+  memcpy(output, &sp_payload[1], 441);
 
   return true;
 }
@@ -120,7 +120,7 @@ bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint
   uint8_t x, y;
   uint16_t length;
   struct regs regs;
-  register uint8_t* bitmap = &qrData[0];
+  register uint8_t* bitmap = &qrData[1];
 
   // to be replaced by getting the bitmap from the FujiNet
   // bitmap = qr_to_bitmap(size);

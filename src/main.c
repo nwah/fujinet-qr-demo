@@ -106,10 +106,10 @@ int main() {
     puts("Output format?");
     puts("  0 = Bytes");
     puts("  1 = Binary");
-#ifdef ATARI
+#ifdef __ATARI__
     puts("  2 = ATASCII");
 #endif
-#ifdef APPLE2
+#ifdef __APPLE2__
     puts("  2 = Text");
 #endif
     puts("  3 = Bitmap");

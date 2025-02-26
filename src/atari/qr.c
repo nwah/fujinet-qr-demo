@@ -46,24 +46,24 @@ void setupPMG(void)
   OS.pcolr3 = 0x0F;
 }
 
-void setupHiRes(void)
-{
-  uint8_t i = 0;
-  hiresDL[0] = DL_BLK8;
-  hiresDL[1] = DL_BLK8;
-  hiresDL[2] = DL_BLK8;
-  hiresDL[3] = DL_LMS(DL_MAP320x1x1);
-  hiResDL[4] = PM_BASE;
-  hiResDL[5] = PM_BASE >> 8;
-  for (i = 7; i < 199; i++) {
-    hiresDL[i] = 0x0F;
-  }
-  hiresDL[200] = DL_JVB;
-  hiresDL[201] = &hiresDL;
-  hiresDL[202] = &hiresDL >> 8;
-  POKE()
-  memset(PM_BASE, 0, 0x2000);
-}
+// void setupHiRes(void)
+// {
+//   uint8_t i = 0;
+//   hiresDL[0] = DL_BLK8;
+//   hiresDL[1] = DL_BLK8;
+//   hiresDL[2] = DL_BLK8;
+//   hiresDL[3] = DL_LMS(DL_MAP320x1x1);
+//   hiResDL[4] = PM_BASE;
+//   hiResDL[5] = PM_BASE >> 8;
+//   for (i = 7; i < 199; i++) {
+//     hiresDL[i] = 0x0F;
+//   }
+//   hiresDL[200] = DL_JVB;
+//   hiresDL[201] = &hiresDL;
+//   hiresDL[202] = &hiresDL >> 8;
+//   POKE()
+//   memset(PM_BASE, 0, 0x2000);
+// }
 
 uint8_t fuji_qr_input(char *text) {
   OS.dcb.ddevic = 0x70;
@@ -163,36 +163,38 @@ bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint
 
   printf("in: %s | out: %d bytes\n", text, length);
 
-  size = 17 + version * 4;
+  // size = 17 + version * 4;
+  size = qrData[0];
+  --length;
 
   // 0x00 or 0x01 bytes
   if (output_mode == 0) {
     for (i = 0; i<length; i++) {
       if (i % 21 == 0) printf("\n ");
-      if (qrData[i]) cputc(' '|128);
+      if (qrData[i+1]) cputc(' '|128);
       else cputc(' ');
     }
   }
   // Bits
   else if (output_mode == 1) {
-    setupHiRes();
-    i = 0;
-    b = 0;
-    for (y = 0; y < size; y++) {
-      for (x = 0; x < size; x++) {
-        b = i % 8;
-        if (b == 0 && x > 0) {
-          i++;
-        }
-        val = (qrData[i] << b) && 1;
-      }
-    }
+    // setupHiRes();
+    // i = 0;
+    // b = 0;
+    // for (y = 0; y < size; y++) {
+    //   for (x = 0; x < size; x++) {
+    //     b = i % 8;
+    //     if (b == 0 && x > 0) {
+    //       i++;
+    //     }
+    //     val = (qrData[i+1] << b) && 1;
+    //   }
+    // }
     puts("(display not implemented yet)");
   }
   // ready-to-print ATASCII
   else if (output_mode == 2) {
     for (i = 0; i<length; i++) {
-      putchar(qrData[i]);
+      putchar(qrData[i+1]);
     }
   }
   // 1-bit bitmap
@@ -204,7 +206,7 @@ bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint
       if (col == 0 && i > 0) {
         row++;
       }
-      POKE(PM_BASE + 0x200 + col * 0x80 + row + 24, qrData[i]);
+      POKE(PM_BASE + 0x200 + col * 0x80 + row + 24, qrData[i+1]);
     }
   }
 
