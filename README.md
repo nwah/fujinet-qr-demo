@@ -1,52 +1,74 @@
 # qr-demo
 
-It's time to write your docs about YOUR AWESOME APP!
+A cross-platform FujiNet demo that generates and displays QR codes using the
+fujinet-lib QR commands.
 
-## building
+## Building
 
-To build the application ensure you have the correct compiler/linker for your platform (e.g. cc65), and
-make on your path, then simply run make.
+This project uses the [MekkoGX](https://github.com/fozzTexx/MekkoGX) modular
+Makefile framework. All project-specific configuration lives in the top-level
+[Makefile](Makefile); everything under [mekkogx/](mekkogx) is reusable framework
+code that should not need editing.
+
+Make sure the toolchain for each platform is on your `PATH` (cc65 for atari and
+apple2), then:
 
 ```shell
-# to clean all artifacts, run this on its own
+# Build every platform in PLATFORMS
+make
+
+# Build a single platform
+make atari
+make apple2
+
+# Build a specific platform target (executable, disk image, clean, ...)
+make atari/disk
+make apple2/r2r
+
+# Remove all build artifacts
 make clean
-
-# to generate the application for all targets
-make release
-
-# to generate a "disk" (e.g. PO/ATR/D64)
-make disk
 ```
 
-As per normal cc65 rules, you can add `TARGETS=...` value to the command to only affect the named target(s) if you
-are building a cross compiled application:
+Build outputs are written to `r2r/<platform>/`:
 
-```shell
-# just the apple2enh, and c64 targets
-make TARGETS="apple2enh c64" release
-```
+- `r2r/atari/qr-demo.com` and a bootable `qr-demo.atr`
+- `r2r/apple2/qr-demo.a2s` and a bootable `qr-demo.po`
 
-The default list of targets can be edit in [Makefile](Makefile). Remove any entries for targets you do not
-wish to build.
+### Configuring the build
 
-## Makefile breakdown
+The top-level `Makefile` declares *what* to build:
 
-The build uses a Makefile which delegates to other mk files for compiling and building disks etc.
-The sources for these files are in the [makefiles](makefiles) subdirectory.
+- `PRODUCT` / `PLATFORMS` — the app name and the platforms to build.
+- `SRC_DIRS` / `INCLUDE_DIRS` — where sources and headers live (`%PLATFORM%`
+  expands to the platform being built).
+- `FUJINET_LIB` — which fujinet-lib to link against. It accepts a version
+  number (downloaded from GitHub releases), a directory, a zip, or a git URL.
+- `LDFLAGS_EXTRA_<PLATFORM>` / `CFLAGS_EXTRA_<PLATFORM>` — per-platform flags.
 
-The first file that Makefile loads is [build.mk](makefiles/build.mk), which loads other makefiles as required if
-they exist, and then creates the `release` task which is the main build task. There is also an `all` task which
-is default and will do the same thing as release.
+See [mekkogx/README.md](mekkogx/README.md) for the full framework documentation.
 
-If your application needs to add some custom configuration, this can be done in `application.mk` in the root dir.
+### fujinet-lib
 
-This will be sourced during compilation and allows you to shape the build how you want, for instance
-you could add a `src/include` dir to the C and ASM paths so that you can place all header files in one location,
-if this is your desire.
+The QR commands this demo uses are not yet in a released fujinet-lib, so
+`FUJINET_LIB` points at a local directory (`fujinet-lib-local/`) containing a
+locally built, QR-enabled library plus its headers. Rebuild that library from
+the [fujinet-lib](https://github.com/FujiNetWIFI/fujinet-lib) repo and drop the
+per-platform `.lib` files and headers into `fujinet-lib-local/`.
+
+Once QR support ships in a release, simply set `FUJINET_LIB` to that version
+number in the Makefile, e.g.:
 
 ```make
-ASFLAGS += --asm-include-dir $(SRCDIR)/include
-CFLAGS += --include-dir $(SRCDIR)/include
+FUJINET_LIB = 4.13.0
 ```
 
-Alternatively you are free to hack the build.mk file at your pleasure.
+### Disk-image tools
+
+Creating bootable disk images needs extra host tools:
+
+- **atari** — [dir2atr](https://github.com/HiassofT/AtariSIO) and
+  [atr](https://github.com/jhallen/atari-tools)
+- **apple2** — [AppleCommander](https://github.com/AppleCommander/AppleCommander/releases/)
+  (`ac` and `acx` on the `PATH`)
+
+Building just the executable only requires the compiler.

@@ -1,17 +1,24 @@
 .vscode/
 
-# build artifacts
+# Build artifacts
 build/
 dist/
 obj/
+r2r/
 _cache/
 
-# emulator configs
+# Local, on-demand fujinet-lib build (regenerate from fujinet-lib; see Makefile FUJINET_LIB)
+fujinet-lib-local/
+
+# Emulator configs
 altirra-debug.ini
 atari800-debug.cfg
 AppleWin.log
 
+# OS specific
 .DS_Store
 
+# Download-on-demand dependencies
 *.jar
 *.dsk
+*.lib
