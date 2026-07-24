@@ -4,7 +4,7 @@ TARGETS = atari apple2
 PROGRAM := qr-demo
 
 # Set this to the version of FN-LIB you wish to use in this project:
-export FUJINET_LIB_VERSION := 4.7.4
+export FUJINET_LIB_VERSION := 4.12.0-qr
 
 # Set DEBUG to true or false to see more or less output about what is going on.
 DEBUG := true

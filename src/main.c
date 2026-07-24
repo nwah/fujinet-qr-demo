@@ -104,22 +104,23 @@ int main() {
     putchar('\n');
 
     puts("Output format?");
-    puts("  0 = Bytes");
-    puts("  1 = Binary");
 #ifdef __ATARI__
-    puts("  2 = ATASCII");
+    puts("  0 = Binary");
+    puts("  1 = ATASCII");
+    puts("  2 = Bitmap");
+    c = cgetc();
+    switch (c) {
+      case '1': output_mode = QR_OUTPUT_MODE_ATASCII; break;
+      case '2': output_mode = QR_OUTPUT_MODE_BITMAP; break;
+      default:  output_mode = QR_OUTPUT_MODE_BINARY; break;
+    }
 #endif
 #ifdef __APPLE2__
-    puts("  2 = Text");
-#endif
-    puts("  3 = Bitmap");
+    puts("  0 = Bitmap");
     c = cgetc();
-    if (c >= '0' && c <= '3') {
-      output_mode = c - 48;
-    } else {
-      output_mode = 1;
-    }
-    putchar(output_mode + 48);
+    output_mode = QR_OUTPUT_MODE_BITMAP;
+#endif
+    putchar(c);
     putchar('\n');
 
     clrscr();
