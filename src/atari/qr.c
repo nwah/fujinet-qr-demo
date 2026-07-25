@@ -44,6 +44,7 @@ void setupPMG(void)
 bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint8_t output_mode, char *result) {
   unsigned long length;
   uint16_t i = 0;
+  uint8_t size = 0;
   uint8_t cols = 3;
   uint8_t col = 0;
   uint8_t row = 0;
@@ -74,14 +75,17 @@ bool qr_encode_text(char *text, uint8_t version, uint8_t ecc, bool shorten, uint
 
   printf("in: %s | out: %u bytes\n", text, (uint16_t)length);
 
-  // qrData[0] holds the QR size; module data follows from qrData[1]
+  // qrData[0] holds the QR size (modules per side); data follows from qrData[1]
+  size = qrData[0];
   --length;
 
-  // one 0x00/0x01 byte per module
+  // BINARY: one bit per module, row-major, LSB first. Unpack and print a block
+  // (inverse space) for each set module.
   if (output_mode == QR_OUTPUT_MODE_BINARY) {
-    for (i = 0; i<length; i++) {
-      if (i % 21 == 0) printf("\n ");
-      if (qrData[i+1]) cputc(' '|128);
+    uint16_t total = (uint16_t)size * size;
+    for (i = 0; i < total; i++) {
+      if (i % size == 0) printf("\n ");
+      if (qrData[1 + (i >> 3)] & (1 << (i & 7))) cputc(' '|128);
       else cputc(' ');
     }
   }

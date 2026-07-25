@@ -13,8 +13,9 @@ char *version = "1.0.0";
 #define CH_DEL 0x7F
 #endif
 
-static void readline(char *s)
+static void read_line(char *s)
 {
+#ifdef __CC65__
   uint16_t i = 0;
   uint8_t c;
 
@@ -44,6 +45,33 @@ static void readline(char *s)
   s[i] = '\0';
 
   cursor(0);
+#elif defined(_CMOC_VERSION_)
+  /* cmoc has no stdin; read keys directly. */
+  uint16_t i = 0;
+  char c;
+
+  do {
+    c = (char)waitkey(0);
+    if (c == '\r' || c == '\n')
+      break;
+    if ((unsigned char)c >= 0x20 && i < 30) {
+      putchar(c);
+      s[i++] = c;
+    }
+  } while (1);
+  putchar('\n');
+  s[i] = '\0';
+#else
+  /* Standard line-buffered console (z88dk, Open Watcom). */
+  size_t n;
+  if (fgets(s, 30, stdin) == NULL) {
+    s[0] = '\0';
+    return;
+  }
+  n = strlen(s);
+  if (n && s[n - 1] == '\n')
+    s[n - 1] = '\0';
+#endif
 }
 
 int main() {
@@ -66,7 +94,7 @@ int main() {
 
     puts("FujiNet QR Code Demo\n");
     puts("Text to encode:");
-    readline(text);
+    read_line(text);
 
     puts("Version? (1-9)");
     // puts("  0 = auto");
@@ -119,6 +147,11 @@ int main() {
     puts("  0 = Bitmap");
     c = cgetc();
     output_mode = QR_OUTPUT_MODE_BITMAP;
+#endif
+#if !defined(__ATARI__) && !defined(__APPLE2__)
+    puts("  0 = Text");
+    c = cgetc();
+    output_mode = QR_OUTPUT_MODE_BINARY;
 #endif
     putchar(c);
     putchar('\n');

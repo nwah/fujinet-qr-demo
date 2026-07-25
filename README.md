@@ -10,16 +10,19 @@ Makefile framework. All project-specific configuration lives in the top-level
 [Makefile](Makefile); everything under [mekkogx/](mekkogx) is reusable framework
 code that should not need editing.
 
-Make sure the toolchain for each platform is on your `PATH` (cc65 for atari and
-apple2), then:
+It builds for **atari, apple2, coco, adam, and msdos**, each with its own
+toolchain (cc65, cmoc, z88dk, Open Watcom) and disk tools. The easiest way to
+build without installing all of those is [defoogi](https://github.com/FozzTexx/defoogi),
+which runs the build in a Docker image that already has everything — just prefix
+any `make` command with `defoogi`:
 
 ```shell
 # Build every platform in PLATFORMS
-make
+defoogi make
 
 # Build a single platform
-make atari
-make apple2
+defoogi make coco
+defoogi make msdos
 
 # Build a specific platform target (executable, disk image, clean, ...)
 make atari/disk
@@ -29,10 +32,16 @@ make apple2/r2r
 make clean
 ```
 
+If you have a platform's toolchain on your `PATH` you can drop the `defoogi`
+prefix for that platform.
+
 Build outputs are written to `r2r/<platform>/`:
 
 - `r2r/atari/qr-demo.com` and a bootable `qr-demo.atr`
 - `r2r/apple2/qr-demo.a2s` and a bootable `qr-demo.po`
+- `r2r/coco/qr-demo.bin` and a bootable `qr-demo.dsk`
+- `r2r/adam/qr-demo.ddp`
+- `r2r/msdos/qr-demo.exe` and a `qr-demo.img` floppy image
 
 ### Configuring the build
 
