@@ -1,4 +1,4 @@
-PRODUCT = qr-demo
+PRODUCT = qrdemo
 PLATFORMS = atari apple2 coco adam msdos
 
 # Compile the shared main.c (src) plus the per-platform driver (src/<platform>/qr.c).
